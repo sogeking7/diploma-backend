@@ -5,12 +5,24 @@ from app import schemas, crud
 from app.api.dependencies import get_db, get_current_active_user, get_current_active_admin
 from app.models.user import User
 from app.models.user_embedding import UserEmbedding
+from app.schemas import UserOut
 from app.utils.pinecone_face import get_pinecone_index
 from deepface import DeepFace
 import numpy as np
 import tempfile
 
 router = APIRouter()
+
+@router.get("/me", response_model=UserOut, summary="Get Current User")
+def read_current_user(
+    current_user: User = Depends(get_current_active_user)
+) -> UserOut:
+    """
+    Retrieve the authenticated user's information.
+
+    - **current_user**: User object retrieved from the access token.
+    """
+    return current_user
 
 @router.post("/verify", status_code=200)
 async def verify_user_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
